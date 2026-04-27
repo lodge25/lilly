@@ -1,0 +1,116 @@
+trigger:
+create or replace trigger trig_van
+after update of emp_salary on empvb6
+for each row
+begin
+insert into salary_auditvb
+(audit_id,emp_id, old_salary, new_salary, change_date, operation)
+VALUES
+(audit_id_seq.nextval,:OLD.emp_id, :OLD.emp_salary, :NEW.emp_salary, SYSDATE,
+&#39;UPDATE&#39;);
+END;
+/
+
+
+
+Procedure:
+
+
+CREATEORREPLACE PROCEDURE increase_salary
+IS
+BEGIN
+
+--Increasesalaryby10%
+UPDATEEMPLOYEE38
+SETemp_salary=emp_salary + (emp_salary * 0.10);
+COMMIT;
+--Displayupdatedsalaries
+FORrecIN(SELECT emp_id, emp_name, emp_salary FROM EMPLOYEE38)
+LOOP
+DBMS_OUTPUT.PUT_LINE(
+'ID:'||rec.emp_id ||
+'Name:'||rec.emp_name ||
+'UpdatedSalary: ' || rec.emp_salary
+);
+END LOOP;
+END;
+/
+
+
+
+
+
+Function:
+
+
+CREATEORREPLACE FUNCTION emp_avg_salary
+RETURNNUMBER
+IS
+v_avg_salaryNUMBER;
+BEGIN
+--Calculateaverage salary
+SELECTAVG(emp_salary)
+INTOv_avg_salary
+FROMEMPLOYEE38;
+DBMS_OUTPUT.PUT_LINE('Average Salary: ' || v_avg_salary);
+DBMS_OUTPUT.PUT_LINE('Employees having salary greater than average:');
+--Displayemployees with salary greater than average
+FOR rec IN (
+SELECTemp_id, emp_name, emp_dept, emp_salary
+FROMEMPLOYEE38
+WHEREemp_salary > v_avg_salary
+)
+LOOP
+DBMS_OUTPUT.PUT_LINE(
+'ID:'||rec.emp_id ||
+'Name:'||rec.emp_name ||
+'Dept:'||rec.emp_dept ||
+'Salary:'||rec.emp_salary
+);
+END LOOP;
+RETURNv_avg_salary;
+END;
+/
+
+
+
+
+
+
+
+cursor:
+
+
+DECLARE
+CURSOR new_cursor IS
+SELECT emp_id, emp_name, department, salary
+FROM new_employee;
+
+CURSOR check_cursor(p_emp_id NUMBER) IS
+SELECT emp_id
+FROM old_employee
+WHERE emp_id = p_emp_id;
+
+v_emp_id old_employee.emp_id%TYPE;
+
+BEGIN
+FOR rec IN new_cursor LOOP
+OPEN check_cursor(rec.emp_id);
+FETCH check_cursor INTO v_emp_id;
+
+IF check_cursor%NOTFOUND THEN
+INSERT INTO old_employee(emp_id, emp_name, department, salary)
+VALUES (rec.emp_id, rec.emp_name, rec.department, rec.salary);
+END IF;
+
+CLOSE check_cursor;
+END LOOP;
+
+COMMIT;
+DBMS_OUTPUT.PUT_LINE('Data merged successfully');
+
+END;
+/
+
+
+
