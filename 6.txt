@@ -1,0 +1,343 @@
+Assignment 6: Banker's Algorithm (Deadlock Avoidance)
+#include <iostream>
+using namespace std;
+
+int main()
+{
+    int n, m;  
+
+    cout << "Enter number of processes: ";
+    cin >> n;
+
+    cout << "Enter number of resource types: ";
+    cin >> m;
+
+    int alloc[n][m], max[n][m], avail[m];
+    int need[n][m];
+    bool finish[n];
+    int safeSeq[n];
+
+    // Input Allocation Matrix
+    cout << "\nEnter Allocation Matrix:\n";
+    for(int i = 0; i < n; i++)
+        for(int j = 0; j < m; j++)
+            cin >> alloc[i][j];
+
+    // Input Maximum Matrix
+    cout << "\nEnter Maximum Matrix:\n";
+    for(int i = 0; i < n; i++)
+        for(int j = 0; j < m; j++)
+            cin >> max[i][j];
+
+    // Input Available Resources
+    cout << "\nEnter Available Resources:\n";
+    for(int j = 0; j < m; j++)
+        cin >> avail[j];
+
+    // Calculate Need Matrix = Max - Allocation
+    for(int i = 0; i < n; i++)
+        for(int j = 0; j < m; j++)
+            need[i][j] = max[i][j] - alloc[i][j];
+
+    // Initialize finish array
+    for(int i = 0; i < n; i++)
+        finish[i] = false;
+
+    int count = 0;
+
+    while(count < n)
+    {
+        bool found = false;
+
+        for(int i = 0; i < n; i++)
+        {
+            if(finish[i] == false)
+            {
+                int j;
+                for(j = 0; j < m; j++)
+                {
+                    if(need[i][j] > avail[j])
+                        break;
+                }
+
+                if(j == m)  
+                {
+                    for(int k = 0; k < m; k++)
+                        avail[k] += alloc[i][k];
+
+                    safeSeq[count++] = i;
+                    finish[i] = true;
+                    found = true;
+                }
+            }
+        }
+
+        if(found == false)
+        {
+            cout << "\nSystem is NOT in Safe State (Deadlock Possible)\n";
+            return 0;
+        }
+    }
+
+    cout << "\nSystem is in Safe State.\nSafe Sequence is: ";
+    for(int i = 0; i < n; i++)
+        cout << "P" << safeSeq[i] << " ";
+
+    cout << endl;
+
+    return 0;
+}
+
+
+
+7. Write a program to simulate memory placement strategies-best fit, first fit,
+next fit and worst fit.
+
+//BEST FIT
+
+#include <iostream>
+using namespace std;
+
+int main() {
+    int nb, np;
+
+    cout << "Enter number of memory blocks: ";
+    cin >> nb;
+
+    int blockSize[nb];
+    cout << "Enter sizes of memory blocks:\n";
+    for (int i = 0; i < nb; i++) {
+        cin >> blockSize[i];
+    }
+
+    cout << "Enter number of processes: ";
+    cin >> np;
+
+    int processSize[np];
+    cout << "Enter sizes of processes:\n";
+    for (int i = 0; i < np; i++) {
+        cin >> processSize[i];
+    }
+
+    int allocation[np];
+    for (int i = 0; i < np; i++)
+        allocation[i] = -1;
+
+    // Best Fit Allocation
+    for (int i = 0; i < np; i++) {
+        int bestIdx = -1;
+
+        for (int j = 0; j < nb; j++) {
+            if (blockSize[j] >= processSize[i]) {
+                if (bestIdx == -1 || blockSize[j] < blockSize[bestIdx]) {
+                    bestIdx = j;
+                }
+            }
+        }
+
+        if (bestIdx != -1) {
+            allocation[i] = bestIdx;
+            blockSize[bestIdx] -= processSize[i];
+        }
+    }
+
+    // Output
+    cout << "\nProcess No.\tProcess Size\tBlock No.\n";
+    for (int i = 0; i < np; i++) {
+        cout << i + 1 << "\t\t" << processSize[i] << "\t\t";
+        if (allocation[i] != -1)
+            cout << allocation[i] + 1;
+        else
+            cout << "Not Allocated";
+        cout << endl;
+    }
+
+    return 0;
+}
+
+
+
+
+//WROST FIT
+
+#include <iostream>
+using namespace std;
+
+int main() {
+    int nb, np;
+
+    cout << "Enter number of memory blocks: ";
+    cin >> nb;
+
+    int blockSize[nb];
+    cout << "Enter sizes of memory blocks:\n";
+    for (int i = 0; i < nb; i++) {
+        cin >> blockSize[i];
+    }
+
+    cout << "Enter number of processes: ";
+    cin >> np;
+
+    int processSize[np];
+    cout << "Enter sizes of processes:\n";
+    for (int i = 0; i < np; i++) {
+        cin >> processSize[i];
+    }
+
+    int allocation[np];
+    for (int i = 0; i < np; i++)
+        allocation[i] = -1;
+
+    // Worst Fit Allocation
+    for (int i = 0; i < np; i++) {
+        int worstIdx = -1;
+
+        for (int j = 0; j < nb; j++) {
+            if (blockSize[j] >= processSize[i]) {
+                if (worstIdx == -1 || blockSize[j] > blockSize[worstIdx]) {
+                    worstIdx = j;
+                }
+            }
+        }
+
+        if (worstIdx != -1) {
+            allocation[i] = worstIdx;
+            blockSize[worstIdx] -= processSize[i];
+        }
+    }
+
+    // Output
+    cout << "\nProcess No.\tProcess Size\tBlock No.\n";
+    for (int i = 0; i < np; i++) {
+        cout << i + 1 << "\t\t" << processSize[i] << "\t\t";
+        if (allocation[i] != -1)
+            cout << allocation[i] + 1;
+        else
+            cout << "Not Allocated";
+        cout << endl;
+    }
+
+    return 0;
+}
+
+
+
+//NEXT FIT
+
+#include <iostream>
+using namespace std;
+
+int main() {
+    int nb, np;
+
+    cout << "Enter number of memory blocks: ";
+    cin >> nb;
+
+    int blockSize[nb];
+    cout << "Enter sizes of memory blocks:\n";
+    for (int i = 0; i < nb; i++) {
+        cin >> blockSize[i];
+    }
+
+    cout << "Enter number of processes: ";
+    cin >> np;
+
+    int processSize[np];
+    cout << "Enter sizes of processes:\n";
+    for (int i = 0; i < np; i++) {
+        cin >> processSize[i];
+    }
+
+    int allocation[np];
+    for (int i = 0; i < np; i++)
+        allocation[i] = -1;
+
+    int last_alloc = 0; // pointer to track last allocation
+
+    // Next Fit Allocation
+    for (int i = 0; i < np; i++) {
+        int count = 0;
+
+        while (count < nb) {
+            if (blockSize[last_alloc] >= processSize[i]) {
+                allocation[i] = last_alloc;
+                blockSize[last_alloc] -= processSize[i];
+                break;
+            }
+
+            last_alloc = (last_alloc + 1) % nb;
+            count++;
+        }
+    }
+
+    // Output
+    cout << "\nProcess No.\tProcess Size\tBlock No.\n";
+    for (int i = 0; i < np; i++) {
+        cout << i + 1 << "\t\t" << processSize[i] << "\t\t";
+        if (allocation[i] != -1)
+            cout << allocation[i] + 1;
+        else
+            cout << "Not Allocated";
+        cout << endl;
+    }
+
+    return 0;
+}
+
+
+
+
+//FIRST FIT
+
+#include <iostream>
+using namespace std;
+
+int main() {
+    int nb, np;
+
+    cout << "Enter number of memory blocks: ";
+    cin >> nb;
+
+    int blockSize[nb];
+    cout << "Enter sizes of memory blocks:\n";
+    for (int i = 0; i < nb; i++) {
+        cin >> blockSize[i];
+    }
+
+    cout << "Enter number of processes: ";
+    cin >> np;
+
+    int processSize[np];
+    cout << "Enter sizes of processes:\n";
+    for (int i = 0; i < np; i++) {
+        cin >> processSize[i];
+    }
+
+    int allocation[np];
+    for (int i = 0; i < np; i++)
+        allocation[i] = -1;
+
+    // First Fit Allocation
+    for (int i = 0; i < np; i++) {
+        for (int j = 0; j < nb; j++) {
+            if (blockSize[j] >= processSize[i]) {
+                allocation[i] = j;
+                blockSize[j] = blockSize[j]-processSize[i];
+                break;
+            }
+        }
+    }
+
+    // Output
+    cout << "\nProcess No.\tProcess Size\tBlock No.\n";
+    for (int i = 0; i < np; i++) {
+        cout << i + 1 << "\t\t" << processSize[i] << "\t\t";
+        if (allocation[i] != -1)
+            cout << allocation[i] + 1;
+        else
+            cout << "Not Allocated";
+        cout << endl;
+    }
+
+    return 0;
+}
