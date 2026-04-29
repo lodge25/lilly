@@ -1,0 +1,437 @@
+a) FCFS – Sort by Arrival Time, run in order
+
+#include<iostream>
+
+using namespace std;
+
+int main() {
+
+int n;
+
+cout << "Enter number of processes: ";
+
+cin >> n;
+
+int pid[n], at[n], bt[n], ct[n], tat[n], wt[n];
+
+for(int i = 0; i < n; i++) {
+
+cout << "Enter PID, Arrival Time and Burst Time for process " << i+1 << ": ";
+
+cin >> pid[i] >> at[i] >> bt[i];
+
+}
+
+for(int i = 0; i < n - 1; i++) {
+
+for(int j = i + 1; j < n; j++) {
+
+if(at[i] > at[j]) {
+
+swap(at[i], at[j]);
+
+swap(bt[i], bt[j]);
+
+swap(pid[i], pid[j]);
+
+}
+
+}
+
+}
+
+int t = 0;
+
+// Calculations
+
+for(int i = 0; i < n; i++) {
+
+if(t < at[i])
+
+t = at[i]; // CPU idle
+
+ct[i] = t + bt[i];
+
+tat[i] = ct[i] - at[i];
+
+wt[i] = tat[i] - bt[i];
+
+t = ct[i];
+
+}
+
+cout << "\n===== FCFS Scheduling Result =====\n";
+
+cout << "PID\tAT\tBT\tCT\tTAT\tWT\n";
+
+for(int i = 0; i < n; i++) {
+
+cout << pid[i] << "\t"
+
+<< at[i] << "\t"
+
+<< bt[i] << "\t"
+
+<< ct[i] << "\t"
+
+<< tat[i] << "\t"
+
+<< wt[i] << "\n";
+
+}
+
+return 0;
+
+}
+
+Output
+
+4
+
+1 0 5
+
+2 1 3
+
+3 2 8
+
+4 3 6
+
+
+
+
+
+b) Priority Scheduling – Sort by Priority (lower = higher priority)
+
+#include<iostream>
+
+using namespace std;
+
+int main() {
+
+int n;
+
+cout << "Enter number of processes: ";
+
+cin >> n;
+
+int pid[n], pr[n], bt[n], ct[n], tat[n], wt[n];
+
+// Taking input
+
+for(int i = 0; i < n; i++) {
+
+cout << "Enter PID, Priority and Burst Time for process " << i+1 << ": ";
+
+cin >> pid[i] >> pr[i] >> bt[i];
+
+}
+
+// Sort by priority (lower value = higher priority)
+
+for(int i = 0; i < n - 1; i++) {
+
+for(int j = i + 1; j < n; j++) {
+
+if(pr[i] > pr[j]) {
+
+swap(pr[i], pr[j]);
+
+swap(bt[i], bt[j]);
+
+swap(pid[i], pid[j]);
+
+}
+
+}
+
+}
+
+int t = 0;
+
+// Calculations
+
+for(int i = 0; i < n; i++) {
+
+ct[i] = t + bt[i];
+
+tat[i] = ct[i]; // since Arrival Time = 0
+
+wt[i] = tat[i] - bt[i];
+
+t = ct[i];
+
+}
+
+cout << "\n===== Priority Scheduling Result =====\n";
+
+cout << "PID\tPR\tBT\tCT\tTAT\tWT\n";
+
+for(int i = 0; i < n; i++) {
+
+cout << pid[i] << "\t"
+
+<< pr[i] << "\t"
+
+<< bt[i] << "\t"
+
+<< ct[i] << "\t"
+
+<< tat[i] << "\t"
+
+<< wt[i] << "\n";
+
+}
+
+return 0;
+
+}
+
+Output
+
+4
+
+1 2 5
+
+2 1 3
+
+3 4 8
+
+4 3 6
+
+
+
+
+
+
+
+c) SJF Preemptive (SRTF) – At every tick, run process with shortest remaining time
+
+#include<iostream>
+
+using namespace std;
+
+int main() {
+
+int n;
+
+cout << "Enter number of processes: ";
+
+cin >> n;
+
+int pid[n], at[n], bt[n], rt[n], ct[n], tat[n], wt[n];
+
+// Input
+
+for(int i = 0; i < n; i++) {
+
+cout << "Enter PID, Arrival Time and Burst Time for Process " << i+1 << ": ";
+
+cin >> pid[i] >> at[i] >> bt[i];
+
+rt[i] = bt[i]; // remaining time
+
+}
+
+int t = 0, done = 0;
+
+// SRTF Logic
+
+while(done < n) {
+
+int sh = -1, minR = 9999;
+
+for(int i = 0; i < n; i++) {
+
+if(at[i] <= t && rt[i] > 0 && rt[i] < minR) {
+
+minR = rt[i];
+
+sh = i;
+
+}
+
+}
+
+if(sh == -1) {
+
+t++; // CPU idle
+
+continue;
+
+}
+
+rt[sh]--;
+
+t++;
+
+if(rt[sh] == 0) {
+
+done++;
+
+ct[sh] = t;
+
+tat[sh] = ct[sh] - at[sh];
+
+wt[sh] = tat[sh] - bt[sh];
+
+}
+
+}
+
+// Output
+
+cout << "\n===== Result Table =====\n";
+
+cout << "PID\tAT\tBT\tCT\tTAT\tWT\n";
+
+
+for(int i = 0; i < n; i++) {
+
+cout << pid[i] << "\t"
+
+<< at[i] << "\t"
+
+<< bt[i] << "\t"
+
+<< ct[i] << "\t"
+
+<< tat[i] << "\t"
+
+<< wt[i] << "\n";
+
+}
+
+return 0;
+
+}
+
+
+Output
+
+4
+
+1 0 7
+
+2 2 4
+
+3 4 1
+
+4 5 4
+
+
+
+
+
+d) Round Robin – Each process gets a fixed time slice (quantum)
+
+#include<iostream>
+
+using namespace std;
+
+int main() {
+
+int n, tq;
+
+cout << "Enter number of processes: ";
+
+cin >> n;
+
+int bt[n], rt[n], wt[n], tat[n];
+
+
+
+for(int i = 0; i < n; i++) {
+
+cout << "Enter Burst Time for Process P" << i+1 << ": ";
+
+cin >> bt[i];
+
+rt[i] = bt[i];
+
+wt[i] = 0;
+
+}
+
+cout << "Enter Time Quantum: ";
+
+cin >> tq;
+
+int t = 0;
+
+bool allDone;
+
+// Round Robin Logic
+
+while(true) {
+
+allDone = true;
+
+for(int i = 0; i < n; i++) {
+
+if(rt[i] > 0) {
+
+allDone = false;
+
+
+if(rt[i] > tq) {
+
+t += tq;
+
+rt[i] -= tq;
+
+} else {
+
+t += rt[i];
+
+wt[i] = t - bt[i];
+
+rt[i] = 0;
+
+}
+
+}
+
+}
+
+if(allDone) break;
+
+}
+
+// Calculate Turnaround Time
+
+for(int i = 0; i < n; i++) {
+
+tat[i] = wt[i] + bt[i];
+
+}
+
+// Output
+
+cout << "\n===== Result Table =====\n";
+
+cout << "P\tBT\tWT\tTAT\n";
+
+for(int i = 0; i < n; i++) {
+
+cout << "P" << i+1 << "\t"
+
+<< bt[i] << "\t"
+
+<< wt[i] << "\t"
+
+<< tat[i] << "\n";
+
+}
+
+return 0;
+
+}
+
+
+Output
+
+4
+
+5 3 8 6
+
+2
